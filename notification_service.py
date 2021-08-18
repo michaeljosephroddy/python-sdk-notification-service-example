@@ -75,7 +75,7 @@ def main():
     # create an instance of the API class
     notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi(api_client)
     routing_api_instance = PureCloudPlatformClientV2.RoutingApi(api_client)
-    queue_name = input("\nEnter the queue name you want to listen to: ")
+    queue_name = input("\nEnter the name of the queue you want to listen to: ")
     queue_id = find_queue_id(queue_name, routing_api_instance)
     if queue_id == None:
         print("\nQUEUE NOT FOUND..")
