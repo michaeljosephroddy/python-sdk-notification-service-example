@@ -1,9 +1,7 @@
 from PureCloudPlatformClientV2.rest import ApiException
+import PureCloudPlatformClientV2
 import websockets
 import asyncio
-import PureCloudPlatformClientV2
-import base64 
-import requests
 import sys
 import os
 import signal
@@ -18,7 +16,6 @@ print("-----------------------------------------------------")
 CLIENT_ID = os.environ["GENESYS_CLOUD_CLIENT_ID"]
 CLIENT_SECRET = os.environ["GENESYS_CLOUD_CLIENT_SECRET"]
 ENVIRONMENT = os.environ["GENESYS_CLOUD_ENVIRONMENT"] # eg. mypurecloud.com or mypurecloud.ie
-
 
 
 def find_queue_id(queue_name, routing_api_instance):
@@ -72,8 +69,9 @@ async def listen(uri, queue_name):
 
 
 def main():
+    # Configure OAuth2 access token for authorization: PureCloud OAuth
     api_client = PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(os.environ['GENESYS_CLOUD_CLIENT_ID'], os.environ['GENESYS_CLOUD_CLIENT_SECRET'])
-    # Configure OAuth2 access token for authorization: PureCloud OAuth and create an instance of the API class
+    # create an instance of the API class
     notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi(api_client)
     routing_api_instance = PureCloudPlatformClientV2.RoutingApi(api_client)
     queue_name = input("\nEnter queue name: ")
