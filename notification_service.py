@@ -12,6 +12,7 @@ print("\n-----------------------------------------------------")
 print("--- Genesys Cloud Python SDK Notification Service ---")
 print("-----------------------------------------------------")
 
+print("\nYou can exit the application at anytime with Ctrl c..")
 
 CLIENT_ID = os.environ["GENESYS_CLOUD_CLIENT_ID"]
 CLIENT_SECRET = os.environ["GENESYS_CLOUD_CLIENT_SECRET"]
@@ -74,7 +75,7 @@ def main():
     # create an instance of the API class
     notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi(api_client)
     routing_api_instance = PureCloudPlatformClientV2.RoutingApi(api_client)
-    queue_name = input("\nEnter queue name: ")
+    queue_name = input("\nEnter the queue name you want to listen to: ")
     queue_id = find_queue_id(queue_name, routing_api_instance)
     if queue_id == None:
         print("\nQUEUE NOT FOUND..")
