@@ -20,33 +20,17 @@ CLIENT_SECRET = os.environ["GENESYS_CLOUD_CLIENT_SECRET"]
 ENVIRONMENT = os.environ["GENESYS_CLOUD_ENVIRONMENT"] # eg. mypurecloud.com or mypurecloud.ie
 
 
-def get_access_token():
-    # Base64 encode the client ID and client secret
-    authorization = base64.b64encode(bytes(CLIENT_ID + ":" + CLIENT_SECRET, "ISO-8859-1")).decode("ascii")
-    # Prepare request headers and request body
-    request_headers = {
-        "Authorization": f"Basic {authorization}",
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    request_body = {
-        "grant_type": "client_credentials"
-    }
-    response = requests.post(f"https://login.{ENVIRONMENT}/oauth/token", data=request_body, headers=request_headers)
-    # Get JSON response body
-    response_json = response.json()
-    # extract access token from response body
-    access_token = response_json["access_token"]
-    return access_token
-
 
 def find_queue_id(queue_name, routing_api_instance):
     try:
         response = routing_api_instance.get_routing_queues(name=queue_name)
+        if response.entities == []:
+            return
         for entity in response.entities:
             if entity.name == queue_name: 
                 print("\nHurray we found your queue!\n")
-                print(f"Queue name = { entity.name }")
-                print(f"Queue id = { entity.id }")
+                print(f"Queue name = {entity.name}")
+                print(f"Queue id = {entity.id}")
                 return entity.id
     except ApiException as e:
         print("Exception when calling RoutingApi->get_routing_queues: %s\n" % e)
@@ -82,21 +66,21 @@ async def listen(uri, queue_name):
         loop = asyncio.get_event_loop()
         loop.add_signal_handler(signal.SIGINT, loop.create_task, websocket.close())
         async for response in websocket:
-            print()
             json_object = json.loads(response)
             json_formatted_str = json.dumps(json_object, indent=4)
-            print(json_formatted_str)
+            print("\n" + json_formatted_str)
 
 
 def main():
-    my_access_token = get_access_token()
-    # Configure OAuth2 access token for authorization: PureCloud OAuth
-    PureCloudPlatformClientV2.configuration.access_token = my_access_token
-    # create an instance of the API class
-    notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi()
-    routing_api_instance = PureCloudPlatformClientV2.RoutingApi()
+    api_client = PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(os.environ['GENESYS_CLOUD_CLIENT_ID'], os.environ['GENESYS_CLOUD_CLIENT_SECRET'])
+    # Configure OAuth2 access token for authorization: PureCloud OAuth and create an instance of the API class
+    notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi(api_client)
+    routing_api_instance = PureCloudPlatformClientV2.RoutingApi(api_client)
     queue_name = input("\nEnter queue name: ")
     queue_id = find_queue_id(queue_name, routing_api_instance)
+    if queue_id == None:
+        print("\nQUEUE NOT FOUND..")
+        sys.exit(0)
     response = create_notifications_channel(notifications_api_instance)
     # extract connect uri and channel id from response
     uri = response.connect_uri
@@ -106,4 +90,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(0)
