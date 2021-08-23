@@ -2,6 +2,10 @@
 
 A simple notification service demonstrating how to listen to notification events from v2.routing.queues.{id}.users using the Python SDK.
 
+### Prerequisite
+
+You will need your queue id for this example. To find your queue id: Make a request to `GET /api/v2/routing/queues?name=queue_name` and include the queue name as a query string. This will filter all queues by queue name and return some information about that particular queue. From there, you can extract the queue id.
+
 1. Create a notifications channel.
 `POST /api/v2/notifications/channels`.
 The following is an example response.
