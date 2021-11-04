@@ -6,6 +6,8 @@ import sys
 import os
 import signal
 import json
+#import nest_asyncio
+#nest_asyncio.apply()
 
 
 print("\n-----------------------------------------------------")
@@ -14,9 +16,9 @@ print("-----------------------------------------------------")
 
 print("\nYou can exit the application at anytime with Ctrl c..")
 
-CLIENT_ID = os.environ["GENESYS_CLOUD_CLIENT_ID"]
-CLIENT_SECRET = os.environ["GENESYS_CLOUD_CLIENT_SECRET"]
-ENVIRONMENT = os.environ["GENESYS_CLOUD_ENVIRONMENT"] # eg. mypurecloud.com or mypurecloud.ie
+CLIENT_ID = os.environ["GC_CLIENT_ID"]
+CLIENT_SECRET = os.environ["GC_CLIENT_SECRET"]
+ENVIRONMENT = os.environ["GC_ENVIRONMENT"] # eg. mypurecloud.com or mypurecloud.ie
 
 
 def find_queue_id(queue_name, routing_api_instance):
@@ -63,18 +65,16 @@ async def listen(uri, queue_name):
     # open the websocket connection
     async with websockets.connect(uri) as websocket:
         print(f"\nConnected! You can now listen to notification events from {queue_name}")
-        loop = asyncio.get_event_loop()
-        loop.add_signal_handler(signal.SIGINT, loop.create_task, websocket.close())
         async for response in websocket:
             # format messages
             json_object = json.loads(response)
             json_formatted_str = json.dumps(json_object, indent=4)
-            print("\n" + json_formatted_str)
+            print(json_formatted_str)
 
 
 def main():
     # Authenticate
-    api_client = PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(os.environ["GENESYS_CLOUD_CLIENT_ID"], os.environ["GENESYS_CLOUD_CLIENT_SECRET"])
+    api_client = PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(CLIENT_ID, CLIENT_SECRET)
     # create an instance of the API class
     notifications_api_instance = PureCloudPlatformClientV2.NotificationsApi(api_client)
     routing_api_instance = PureCloudPlatformClientV2.RoutingApi(api_client)
@@ -99,4 +99,6 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
+        sys.exit(0)
+    except RuntimeError:
         sys.exit(0)
