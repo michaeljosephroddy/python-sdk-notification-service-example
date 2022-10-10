@@ -4,10 +4,7 @@ import websockets
 import asyncio
 import sys
 import os
-import signal
 import json
-#import nest_asyncio
-#nest_asyncio.apply()
 
 
 print("\n-----------------------------------------------------")
